@@ -1,0 +1,64 @@
+from collections import deque
+
+def is_valid_state(state, jug1_capacity, jug2_capacity):
+    jug1, jug2 = state
+    return 0 <= jug1 <= jug1_capacity and 0 <= jug2 <= jug2_capacity
+
+def get_neighbors(state, jug1_capacity, jug2_capacity):
+    jug1, jug2 = state
+    possible_states = []
+    
+    # Fill Jug 1
+    possible_states.append((jug1_capacity, jug2))
+    # Fill Jug 2
+    possible_states.append((jug1, jug2_capacity))
+    # Empty Jug 1
+    possible_states.append((0, jug2))
+    # Empty Jug 2
+    possible_states.append((jug1, 0))
+    # Pour Jug 1 into Jug 2
+    pour_amount = min(jug1, jug2_capacity - jug2)
+    possible_states.append((jug1 - pour_amount, jug2 + pour_amount))
+    # Pour Jug 2 into Jug 1
+    pour_amount = min(jug2, jug1_capacity - jug1)
+    possible_states.append((jug1 + pour_amount, jug2 - pour_amount))
+    
+    return [state for state in possible_states if is_valid_state(state, jug1_capacity, jug2_capacity)]
+
+def bfs(jug1_capacity, jug2_capacity, target):
+    initial_state = (0, 0)
+    queue = deque([(initial_state, [])])
+    visited = set()
+
+    while queue:
+        (current_state, path) = queue.popleft()
+
+        if current_state in visited:
+            continue
+
+        visited.add(current_state)
+
+        jug1, jug2 = current_state
+
+        if jug1 == target or jug2 == target:
+            return path + [current_state]
+
+        for neighbor in get_neighbors(current_state, jug1_capacity, jug2_capacity):
+            queue.append((neighbor, path + [current_state]))
+
+    return None
+
+def solve_water_jug(jug1_capacity, jug2_capacity, target):
+    solution = bfs(jug1_capacity, jug2_capacity, target)
+    if solution:
+        for step in solution:
+            print(step)
+    else:
+        print("No solution exists.")
+
+if __name__ == "__main__":
+    jug1_capacity = 4
+    jug2_capacity = 3
+    target = 2
+
+    solve_water_jug(jug1_capacity, jug2_capacity, target)
