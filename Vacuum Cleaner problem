@@ -1,0 +1,73 @@
+from collections import deque
+
+class State:
+    def __init__(self, grid, vacuum_pos):
+        self.grid = tuple(tuple(row) for row in grid)  # Make grid hashable
+        self.vacuum_pos = vacuum_pos
+
+    def __eq__(self, other):
+        return self.grid == other.grid and self.vacuum_pos == other.vacuum_pos
+
+    def __hash__(self):
+        return hash((self.grid, self.vacuum_pos))
+
+    def is_goal(self):
+        return all(cell == 0 for row in self.grid for cell in row)
+
+    def get_successors(self):
+        successors = []
+        x, y = self.vacuum_pos
+        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # Up, Down, Left, Right
+
+        # Move to adjacent cells
+        for dx, dy in directions:
+            new_x, new_y = x + dx, y + dy
+            if 0 <= new_x < len(self.grid) and 0 <= new_y < len(self.grid[0]):
+                new_state = State(self.grid, (new_x, new_y))
+                successors.append(new_state)
+
+        # Clean the current cell
+        if self.grid[x][y] == 1:
+            new_grid = [list(row) for row in self.grid]
+            new_grid[x][y] = 0
+            new_state = State(new_grid, (x, y))
+            successors.append(new_state)
+
+        return successors
+
+def bfs(initial_state):
+    queue = deque([(initial_state, [])])
+    visited = set()
+
+    while queue:
+        (current_state, path) = queue.popleft()
+        if current_state.is_goal():
+            return path + [current_state]
+
+        visited.add(current_state)
+
+        for successor in current_state.get_successors():
+            if successor not in visited:
+                queue.append((successor, path + [current_state]))
+
+    return None
+
+def print_solution(solution):
+    if solution:
+        for state in solution:
+            print("Vacuum position:", state.vacuum_pos)
+            for row in state.grid:
+                print(row)
+            print()
+    else:
+        print("No solution exists.")
+
+if __name__ == "__main__":
+    initial_grid = [
+        [1, 1],
+        [1, 1]
+    ]
+    initial_vacuum_pos = (0, 0)
+    initial_state = State(initial_grid, initial_vacuum_pos)
+    solution = bfs(initial_state)
+    print_solution(solution)
