@@ -1,0 +1,76 @@
+from collections import deque
+
+class State:
+    def __init__(self, missionaries, cannibals, boat):
+        self.missionaries = missionaries
+        self.cannibals = cannibals
+        self.boat = boat
+
+    def __eq__(self, other):
+        return (self.missionaries == other.missionaries and
+                self.cannibals == other.cannibals and
+                self.boat == other.boat)
+
+    def __hash__(self):
+        return hash((self.missionaries, self.cannibals, self.boat))
+
+    def is_valid(self):
+        if self.missionaries < 0 or self.missionaries > 3:
+            return False
+        if self.cannibals < 0 or self.cannibals > 3:
+            return False
+        if (self.missionaries < self.cannibals and self.missionaries > 0):
+            return False
+        if (3 - self.missionaries < 3 - self.cannibals and (3 - self.missionaries) > 0):
+            return False
+        return True
+
+    def is_goal(self):
+        return self.missionaries == 0 and self.cannibals == 0 and self.boat == 0
+
+    def get_successors(self):
+        successors = []
+        if self.boat == 1:
+            new_boat = 0
+        else:
+            new_boat = 1
+
+        moves = [(1, 0), (2, 0), (0, 1), (0, 2), (1, 1)]
+
+        for move in moves:
+            new_missionaries = self.missionaries + move[0] * (-1 if self.boat == 1 else 1)
+            new_cannibals = self.cannibals + move[1] * (-1 if self.boat == 1 else 1)
+            new_state = State(new_missionaries, new_cannibals, new_boat)
+            if new_state.is_valid():
+                successors.append(new_state)
+
+        return successors
+
+def bfs(initial_state):
+    queue = deque([(initial_state, [])])
+    visited = set()
+
+    while queue:
+        (current_state, path) = queue.popleft()
+        if current_state.is_goal():
+            return path + [current_state]
+
+        visited.add(current_state)
+
+        for successor in current_state.get_successors():
+            if successor not in visited:
+                queue.append((successor, path + [current_state]))
+
+    return None
+
+def print_solution(solution):
+    if solution:
+        for state in solution:
+            print(f"Missionaries: {state.missionaries}, Cannibals: {state.cannibals}, Boat: {state.boat}")
+    else:
+        print("No solution exists.")
+
+if __name__ == "__main__":
+    initial_state = State(3, 3, 1)
+    solution = bfs(initial_state)
+    print_solution(solution)
