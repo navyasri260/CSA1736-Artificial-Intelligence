@@ -1,0 +1,50 @@
+def dfs_recursive(graph, start, visited=None):
+    """
+    Perform DFS using recursion.
+    
+    :param graph: Dictionary representing the graph.
+    :param start: Starting node for the DFS.
+    :param visited: Set to keep track of visited nodes.
+    """
+    if visited is None:
+        visited = set()
+    visited.add(start)
+    print(start, end=' ')
+
+    for neighbor in graph[start]:
+        if neighbor not in visited:
+            dfs_recursive(graph, neighbor, visited)
+
+def dfs_iterative(graph, start):
+    """
+    Perform DFS using an iterative approach with a stack.
+    
+    :param graph: Dictionary representing the graph.
+    :param start: Starting node for the DFS.
+    """
+    visited = set()
+    stack = [start]
+
+    while stack:
+        vertex = stack.pop()
+        if vertex not in visited:
+            print(vertex, end=' ')
+            visited.add(vertex)
+            # Add neighbors to stack in reverse order to maintain the order of traversal
+            stack.extend(reversed(graph[vertex]))
+
+# Example usage
+if __name__ == "__main__":
+    graph = {
+        'A': ['B', 'C'],
+        'B': ['A', 'D', 'E'],
+        'C': ['A', 'F'],
+        'D': ['B'],
+        'E': ['B', 'F'],
+        'F': ['C', 'E']
+    }
+
+    print("Recursive DFS:")
+    dfs_recursive(graph, 'A')
+    print("\nIterative DFS:")
+    dfs_iterative(graph, 'A')
